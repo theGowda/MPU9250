@@ -116,9 +116,9 @@ public:
     bool setup(const uint8_t addr, const MPU9250Setting& mpu_setting = MPU9250Setting(), WireType& w = Wire) {
         // addr should be valid for MPU
         if ((addr < MPU9250_DEFAULT_ADDRESS) || (addr > MPU9250_DEFAULT_ADDRESS + 7)) {
-            Serial.print("I2C address 0x");
-            Serial.print(addr, HEX);
-            Serial.println(" is not valid for MPU. Please check your I2C address.");
+            printf("I2C address 0x");
+            printf(addr, HEX);
+            printf(" is not valid for MPU. Please check your I2C address.");
             return false;
         }
         MPU9250_ADDRESS = addr;
@@ -131,12 +131,12 @@ public:
                 initAK8963();
             else {
                 if (b_verbose)
-                    Serial.println("Could not connect to AK8963");
+                    printf("Could not connect to AK8963");
                 return false;
             }
         } else {
             if (b_verbose)
-                Serial.println("Could not connect to MPU9250");
+                printf("Could not connect to MPU9250");
             return false;
         }
         return true;
@@ -165,8 +165,8 @@ public:
     bool isConnectedMPU9250() {
         byte c = read_byte(MPU9250_ADDRESS, WHO_AM_I_MPU9250);
         if (b_verbose) {
-            Serial.print("MPU9250 WHO AM I = ");
-            Serial.println(c, HEX);
+            printf("MPU9250 WHO AM I = ");
+            printf(c, HEX);
         }
         return (c == WHO_AM_I);
     }
@@ -174,8 +174,8 @@ public:
     bool isConnectedAK8963() {
         byte c = read_byte(AK8963_ADDRESS, AK8963_WHO_AM_I);
         if (b_verbose) {
-            Serial.print("AK8963 WHO AM I = ");
-            Serial.println(c, HEX);
+            printf("AK8963 WHO AM I = ");
+            printf(c, HEX);
         }
         return (c == AK8963_WHOAMI_DEFAULT_VALUE);
     }
@@ -394,13 +394,13 @@ private:
         delay(10);
 
         if (b_verbose) {
-            Serial.println("Mag Factory Calibration Values: ");
-            Serial.print("X-Axis sensitivity offset value ");
-            Serial.println(mag_bias_factory[0], 2);
-            Serial.print("Y-Axis sensitivity offset value ");
-            Serial.println(mag_bias_factory[1], 2);
-            Serial.print("Z-Axis sensitivity offset value ");
-            Serial.println(mag_bias_factory[2], 2);
+            printf("Mag Factory Calibration Values: ");
+            printf("X-Axis sensitivity offset value ");
+            printf(mag_bias_factory[0], 2);
+            printf("Y-Axis sensitivity offset value ");
+            printf(mag_bias_factory[1], 2);
+            printf("Z-Axis sensitivity offset value ");
+            printf(mag_bias_factory[2], 2);
         }
     }
 
@@ -660,22 +660,22 @@ private:
         collect_mag_data_to(mag_bias, mag_scale);
 
         if (b_verbose) {
-            Serial.println("Mag Calibration done!");
+            printf("Mag Calibration done!");
 
-            Serial.println("AK8963 mag biases (mG)");
-            Serial.print(mag_bias[0]);
-            Serial.print(", ");
-            Serial.print(mag_bias[1]);
-            Serial.print(", ");
-            Serial.print(mag_bias[2]);
-            Serial.println();
-            Serial.println("AK8963 mag scale (mG)");
-            Serial.print(mag_scale[0]);
-            Serial.print(", ");
-            Serial.print(mag_scale[1]);
-            Serial.print(", ");
-            Serial.print(mag_scale[2]);
-            Serial.println();
+            printf("AK8963 mag biases (mG)");
+            printf(mag_bias[0]);
+            printf(", ");
+            printf(mag_bias[1]);
+            printf(", ");
+            printf(mag_bias[2]);
+            printf();
+            printfln("AK8963 mag scale (mG)");
+            printf(mag_scale[0]);
+            printf(", ");
+            printf(mag_scale[1]);
+            printf(", ");
+            printf(mag_scale[2]);
+            printf();
         }
 
         // restore MAG_OUTPUT_BITS
@@ -685,7 +685,7 @@ private:
 
     void collect_mag_data_to(float* m_bias, float* m_scale) {
         if (b_verbose)
-            Serial.println("Mag Calibration: Wave device in a figure eight until done!");
+            printf("Mag Calibration: Wave device in a figure eight until done!\n");
         delay(4000);
 
         // shoot for ~fifteen seconds of mag data
@@ -710,15 +710,15 @@ private:
         }
 
         if (b_verbose) {
-            Serial.println("mag x min/max:");
-            Serial.println(mag_max[0]);
-            Serial.println(mag_min[0]);
-            Serial.println("mag y min/max:");
-            Serial.println(mag_max[1]);
-            Serial.println(mag_min[1]);
-            Serial.println("mag z min/max:");
-            Serial.println(mag_max[2]);
-            Serial.println(mag_min[2]);
+            printf("mag x min/max:");
+            printf(mag_max[0]);
+            printf(mag_min[0]);
+            printf("mag y min/max:");
+            printf(mag_max[1]);
+            printf(mag_min[1]);
+            printf("mag z min/max:");
+            printf(mag_max[2]);
+            printf(mag_min[2]);
         }
 
         // Get hard iron correction
@@ -829,24 +829,24 @@ private:
         }
 
         if (b_verbose) {
-            Serial.print("x-axis self test: acceleration trim within : ");
-            Serial.print(self_test_result[0], 1);
-            Serial.println("% of factory value");
-            Serial.print("y-axis self test: acceleration trim within : ");
-            Serial.print(self_test_result[1], 1);
-            Serial.println("% of factory value");
-            Serial.print("z-axis self test: acceleration trim within : ");
-            Serial.print(self_test_result[2], 1);
-            Serial.println("% of factory value");
-            Serial.print("x-axis self test: gyration trim within : ");
-            Serial.print(self_test_result[3], 1);
-            Serial.println("% of factory value");
-            Serial.print("y-axis self test: gyration trim within : ");
-            Serial.print(self_test_result[4], 1);
-            Serial.println("% of factory value");
-            Serial.print("z-axis self test: gyration trim within : ");
-            Serial.print(self_test_result[5], 1);
-            Serial.println("% of factory value");
+            printf("x-axis self test: acceleration trim within : ");
+            printf(self_test_result[0], 1);
+            printf("% of factory value");
+            printf("y-axis self test: acceleration trim within : ");
+            printf(self_test_result[1], 1);
+            printf("% of factory value");
+            printf("z-axis self test: acceleration trim within : ");
+            printf(self_test_result[2], 1);
+            printf("% of factory value");
+            printf("x-axis self test: gyration trim within : ");
+            printf(self_test_result[3], 1);
+            printf("% of factory value");
+            printf("y-axis self test: gyration trim within : ");
+            printf(self_test_result[4], 1);
+            printf("% of factory value");
+            printf("z-axis self test: gyration trim within : ");
+            printf(self_test_result[5], 1);
+            printf("% of factory value");
         }
 
         bool b = true;
@@ -939,8 +939,8 @@ private:
 
     void print_i2c_error() {
         if (i2c_err_ == 7) return;  // to avoid stickbreaker-i2c branch's error code
-        Serial.print("I2C ERROR CODE : ");
-        Serial.println(i2c_err_);
+        printf("I2C ERROR CODE : ");
+        printf(i2c_err_);
     }
 };
 
