@@ -2,7 +2,7 @@
 #ifndef MPU9250_H
 #define MPU9250_H
 
-#include <Wire.h>
+#include <i2c.h>
 
 #include "MPU9250/MPU9250RegisterMap.h"
 #include "MPU9250/QuaternionFilter.h"
@@ -65,7 +65,7 @@ struct MPU9250Setting {
     ACCEL_DLPF_CFG accel_dlpf_cfg{ACCEL_DLPF_CFG::DLPF_45HZ};
 };
 
-template <typename WireType, uint8_t WHO_AM_I>
+template <uint8_t WHO_AM_I>
 class MPU9250_ {
     static constexpr uint8_t MPU9250_DEFAULT_ADDRESS{0x68};  // Device address when ADO = 0
     static constexpr uint8_t AK8963_ADDRESS{0x0C};           //  Address of magnetometer
@@ -105,15 +105,17 @@ class MPU9250_ {
     bool b_ahrs{true};
     bool b_verbose{false};
 
-    // I2C
+    /*// I2C
     WireType* wire;
     uint8_t i2c_err_;
+    */
+    I2CDevice device;
 
 public:
     static constexpr uint16_t CALIB_GYRO_SENSITIVITY = 131;     // = 131 LSB/degrees/sec
     static constexpr uint16_t CALIB_ACCEL_SENSITIVITY = 16384;  // = 16384 LSB/g
 
-    bool setup(const uint8_t addr, const MPU9250Setting& mpu_setting = MPU9250Setting(), WireType& w = Wire) {
+    bool setup(const uint8_t addr, const I2CDevice *dev, const MPU9250Setting& mpu_setting = MPU9250Setting()) {
         // addr should be valid for MPU
         if ((addr < MPU9250_DEFAULT_ADDRESS) || (addr > MPU9250_DEFAULT_ADDRESS + 7)) {
             printf("I2C address 0x%x", addr);
@@ -122,7 +124,7 @@ public:
         }
         MPU9250_ADDRESS = addr;
         setting = mpu_setting;
-        wire = &w;
+        device = dev;
 
         if (isConnectedMPU9250()) {
             initMPU9250();
@@ -872,6 +874,7 @@ private:
         }
     }
 
+    /*
     void write_byte(uint8_t address, uint8_t subAddress, uint8_t data) {
         wire->beginTransmission(address);    // Initialize the Tx buffer
         wire->write(subAddress);             // Put slave register address in Tx buffer
@@ -879,7 +882,23 @@ private:
         i2c_err_ = wire->endTransmission();  // Send the Tx buffer
         if (i2c_err_) print_i2c_error();
     }
+    */
 
+    void write_byte(uint8_t address, uint8_t subAddress, uint8_t data)
+    {
+        device.addr = (unsigned short)address;
+        
+        unsigned char buffer[1];
+        ssize_t size = sizeof(buffer);
+        memset(buffer, 0, sizeof(buffer));
+
+        if ((i2c_write(&device, (unsigned int)subAddress, buffer, size)) != size) 
+        {
+            printf("There was an error writing to i2c device");
+        }
+    }
+
+    /*
     uint8_t read_byte(uint8_t address, uint8_t subAddress) {
         uint8_t data = 0;                         // `data` will store the register data
         wire->beginTransmission(address);         // Initialize the Tx buffer
@@ -890,7 +909,21 @@ private:
         if (wire->available()) data = wire->read();  // Fill Rx buffer with result
         return data;                                 // Return data read from slave register
     }
+    */
 
+    uint8_t read_byte(uint8_t address, uint8_t subAddress)
+    {
+        device.addr = (unsigned short)address;
+        uint8_t data = 0;
+        if ((i2c_read(&device, (unsigned int)subAddress, data, sizeof(data))) != size)
+        {
+            printf("There was an error reading from i2c device");
+            return 0;
+        }
+        else return data;
+    }
+
+    /*
     void read_bytes(uint8_t address, uint8_t subAddress, uint8_t count, uint8_t* dest) {
         wire->beginTransmission(address);         // Initialize the Tx buffer
         wire->write(subAddress);                  // Put slave register address in Tx buffer
@@ -902,6 +935,18 @@ private:
             dest[i++] = wire->read();
         }  // Put read results in the Rx buffer
     }
+    */
+
+   void read_bytes(uint8_t address, uint8_t subAddress, uint8_t count, uint8_t* dest)
+   {
+       device.addr = (unsigned short)address;
+
+       if ((i2c_read(&device, (unsigned int)subAddress, dest, count)) != size)
+       {
+           printf("There was an error reading from i2c device");
+       }
+   }
+    
 
     void print_i2c_error() {
         if (i2c_err_ == 7) return;  // to avoid stickbreaker-i2c branch's error code
@@ -909,7 +954,7 @@ private:
     }
 };
 
-using MPU9250 = MPU9250_<TwoWire, MPU9250_WHOAMI_DEFAULT_VALUE>;
-using MPU9255 = MPU9250_<TwoWire, MPU9255_WHOAMI_DEFAULT_VALUE>;
+using MPU9250 = MPU9250_<MPU9250_WHOAMI_DEFAULT_VALUE>;
+using MPU9255 = MPU9250_<MPU9255_WHOAMI_DEFAULT_VALUE>;
 
 #endif  // MPU9250_H
