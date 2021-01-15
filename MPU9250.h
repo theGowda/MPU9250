@@ -116,9 +116,8 @@ public:
     bool setup(const uint8_t addr, const MPU9250Setting& mpu_setting = MPU9250Setting(), WireType& w = Wire) {
         // addr should be valid for MPU
         if ((addr < MPU9250_DEFAULT_ADDRESS) || (addr > MPU9250_DEFAULT_ADDRESS + 7)) {
-            printf("I2C address 0x");
-            printf(addr, HEX);
-            printf(" is not valid for MPU. Please check your I2C address.");
+            printf("I2C address 0x%x", addr);
+            printf(" is not valid for MPU. Please check your I2C address.\n");
             return false;
         }
         MPU9250_ADDRESS = addr;
@@ -131,12 +130,12 @@ public:
                 initAK8963();
             else {
                 if (b_verbose)
-                    printf("Could not connect to AK8963");
+                    printf("Could not connect to AK8963\n");
                 return false;
             }
         } else {
             if (b_verbose)
-                printf("Could not connect to MPU9250");
+                printf("Could not connect to MPU9250\n");
             return false;
         }
         return true;
@@ -165,8 +164,7 @@ public:
     bool isConnectedMPU9250() {
         byte c = read_byte(MPU9250_ADDRESS, WHO_AM_I_MPU9250);
         if (b_verbose) {
-            printf("MPU9250 WHO AM I = ");
-            printf(c, HEX);
+            printf("MPU9250 WHO AM I = %x\n", c);
         }
         return (c == WHO_AM_I);
     }
@@ -174,8 +172,7 @@ public:
     bool isConnectedAK8963() {
         byte c = read_byte(AK8963_ADDRESS, AK8963_WHO_AM_I);
         if (b_verbose) {
-            printf("AK8963 WHO AM I = ");
-            printf(c, HEX);
+            printf("AK8963 WHO AM I = %x\n", c);
         }
         return (c == AK8963_WHOAMI_DEFAULT_VALUE);
     }
@@ -394,13 +391,10 @@ private:
         delay(10);
 
         if (b_verbose) {
-            printf("Mag Factory Calibration Values: ");
-            printf("X-Axis sensitivity offset value ");
-            printf(mag_bias_factory[0], 2);
-            printf("Y-Axis sensitivity offset value ");
-            printf(mag_bias_factory[1], 2);
-            printf("Z-Axis sensitivity offset value ");
-            printf(mag_bias_factory[2], 2);
+            printf("Mag Factory Calibration Values: \n");
+            printf("X-Axis sensitivity offset value %0.2f\n", mag_bias_factory[0]);
+            printf("Y-Axis sensitivity offset value %0.2f\n", mag_bias_factory[1]);
+            printf("Z-Axis sensitivity offset value %0.2f\n", mag_bias_factory[2]);
         }
     }
 
@@ -660,22 +654,12 @@ private:
         collect_mag_data_to(mag_bias, mag_scale);
 
         if (b_verbose) {
-            printf("Mag Calibration done!");
+            printf("Mag Calibration done!\n");
 
-            printf("AK8963 mag biases (mG)");
-            printf(mag_bias[0]);
-            printf(", ");
-            printf(mag_bias[1]);
-            printf(", ");
-            printf(mag_bias[2]);
-            printf();
-            printfln("AK8963 mag scale (mG)");
-            printf(mag_scale[0]);
-            printf(", ");
-            printf(mag_scale[1]);
-            printf(", ");
-            printf(mag_scale[2]);
-            printf();
+            printf("AK8963 mag biases (mG)\n");
+            printf("%f, %f, %f\n", mag_bias[0], mag_bias[1], mag_bias[3]);
+            printf("AK8963 mag scale (mG)\n");
+            printf("%f, %f, %f\n", mag_scale[0], mag_scale[1], mag_scale[2]);
         }
 
         // restore MAG_OUTPUT_BITS
@@ -710,15 +694,9 @@ private:
         }
 
         if (b_verbose) {
-            printf("mag x min/max:");
-            printf(mag_max[0]);
-            printf(mag_min[0]);
-            printf("mag y min/max:");
-            printf(mag_max[1]);
-            printf(mag_min[1]);
-            printf("mag z min/max:");
-            printf(mag_max[2]);
-            printf(mag_min[2]);
+            printf("mag x min/max: %d/%d\n", mag_min[0], mag_max[0]);
+            printf("mag y min/max: %d/%d\n", mag_min[1], mag_max[1]);
+            printf("mag z min/max: %d/%d\n", mag_min[2], mag_max[2]);
         }
 
         // Get hard iron correction
@@ -829,24 +807,12 @@ private:
         }
 
         if (b_verbose) {
-            printf("x-axis self test: acceleration trim within : ");
-            printf(self_test_result[0], 1);
-            printf("% of factory value");
-            printf("y-axis self test: acceleration trim within : ");
-            printf(self_test_result[1], 1);
-            printf("% of factory value");
-            printf("z-axis self test: acceleration trim within : ");
-            printf(self_test_result[2], 1);
-            printf("% of factory value");
-            printf("x-axis self test: gyration trim within : ");
-            printf(self_test_result[3], 1);
-            printf("% of factory value");
-            printf("y-axis self test: gyration trim within : ");
-            printf(self_test_result[4], 1);
-            printf("% of factory value");
-            printf("z-axis self test: gyration trim within : ");
-            printf(self_test_result[5], 1);
-            printf("% of factory value");
+            printf("x-axis self test: acceleration trim within : %0.1f% of factory value\n", self_test_result[0]);
+            printf("y-axis self test: acceleration trim within : %0.1f% of factory value\n", self_test_result[1]);
+            printf("z-axis self test: acceleration trim within : %0.1f% of factory value\n", self_test_result[2]);
+            printf("x-axis self test: gyration trim within : %0.1f% of factory value\n", self_test_result[3]);
+            printf("y-axis self test: gyration trim within : %0.1f% of factory value\n", self_test_result[4]);
+            printf("z-axis self test: gyration trim within : %0.1f% of factory value\n", self_test_result[5]);
         }
 
         bool b = true;
@@ -939,8 +905,7 @@ private:
 
     void print_i2c_error() {
         if (i2c_err_ == 7) return;  // to avoid stickbreaker-i2c branch's error code
-        printf("I2C ERROR CODE : ");
-        printf(i2c_err_);
+        printf("I2C ERROR CODE : %d\n", i2c_err_);
     }
 };
 
