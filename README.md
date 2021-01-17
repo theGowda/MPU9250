@@ -1,4 +1,5 @@
 # MPU9250
+
 Arduino library for [MPU9250](https://www.invensense.com/products/motion-tracking/9-axis/mpu-9250/) Nine-Axis (Gyro + Accelerometer + Compass) MEMS MotionTracking™ Device
 
 This library is based on the [great work](https://github.com/kriswiner/MPU9250) by [kriswiner](https://github.com/kriswiner), and re-writen for the simple usage.
@@ -7,7 +8,7 @@ This library is based on the [great work](https://github.com/kriswiner/MPU9250) 
 
 ### Simple Measurement
 
-``` C++
+```C++
 #include "MPU9250.h"
 
 MPU9250 mpu;
@@ -37,7 +38,7 @@ void loop() {
 - device should be stay still during accel/gyro calibration
 - round device around during mag calibration
 
-``` C++
+```C++
 #include "MPU9250.h"
 
 MPU9250 mpu;
@@ -64,23 +65,21 @@ void loop() { }
 
 The coordinate of quaternion and euler angles are based on the axes of acceleration and gyro sensors (Right-Handed, X-forward, Z-up). On the other hand, roll, pitch, and yaw angles are basedd on airplane coordinate (Right-Handed, X-forward, Z-down). Please use `getEulerX/Y/Z()` for euler angles and `getRoll/Pitch/Yaw()` for airplane coordinate angles.
 
-
 ## Other Settings
 
 ### I2C Address
 
 You must set your own address based on A0, A1, A2 setting as:
 
-``` C++
+```C++
 mpu.setup(0x70);
 ```
-
 
 ### Customize MPU9250 Configuration
 
 You can set your own setting using `MPU9250Setting` struct as:
 
-``` C++
+```C++
 MPU9250Setting setting;
 setting.accel_fs_sel = ACCEL_FS_SEL::A16G;
 setting.gyro_fs_sel = GYRO_FS_SEL::G2000DPS;
@@ -96,7 +95,6 @@ mpu.setup(0x68, setting);
 
 See `custom_setting.ino` example for detail.
 
-
 #### List of Settings
 
 ```C++
@@ -104,7 +102,7 @@ enum class ACCEL_FS_SEL { A2G, A4G, A8G, A16G };
 enum class GYRO_FS_SEL { G250DPS, G500DPS, G1000DPS, G2000DPS };
 enum class MAG_OUTPUT_BITS { M14BITS, M16BITS };
 
-enum class FIFO_SAMPLE_RATE : uint8_t {
+enum class FIFO_SAMPLE_RATE : u_int8_t {
     SMPL_1000HZ,
     SMPL_500HZ,
     SMPL_333HZ,
@@ -115,7 +113,7 @@ enum class FIFO_SAMPLE_RATE : uint8_t {
     SMPL_125HZ,
 };
 
-enum class GYRO_DLPF_CFG : uint8_t {
+enum class GYRO_DLPF_CFG : u_int8_t {
     DLPF_250HZ,
     DLPF_184HZ,
     DLPF_92HZ,
@@ -126,7 +124,7 @@ enum class GYRO_DLPF_CFG : uint8_t {
     DLPF_3600HZ,
 };
 
-enum class ACCEL_DLPF_CFG : uint8_t {
+enum class ACCEL_DLPF_CFG : u_int8_t {
     DLPF_218HZ_0,
     DLPF_218HZ_1,
     DLPF_99HZ,
@@ -142,9 +140,9 @@ struct MPU9250Setting {
     GYRO_FS_SEL      gyro_fs_sel {GYRO_FS_SEL::G2000DPS};
     MAG_OUTPUT_BITS  mag_output_bits {MAG_OUTPUT_BITS::M16BITS};
     FIFO_SAMPLE_RATE fifo_sample_rate {FIFO_SAMPLE_RATE::SMPL_200HZ};
-    uint8_t          gyro_fchoice {0x03};
+    u_int8_t          gyro_fchoice {0x03};
     GYRO_DLPF_CFG    gyro_dlpf_cfg {GYRO_DLPF_CFG::DLPF_41HZ};
-    uint8_t          accel_fchoice {0x01};
+    u_int8_t          accel_fchoice {0x01};
     ACCEL_DLPF_CFG   accel_dlpf_cfg {ACCEL_DLPF_CFG::DLPF_45HZ};
 };
 ```
@@ -162,7 +160,6 @@ You can find magnetic declination in your city [here](http://www.magnetic-declin
 
 For more details, see [wiki](https://en.wikipedia.org/wiki/Magnetic_declination).
 
-
 ### Quaternion Filter
 
 You can choose quaternion filter using `void selectFilter(QuatFilterSel sel)`. Available quaternion filters are listed below.
@@ -175,12 +172,11 @@ enum class QuatFilterSel {
 };
 ```
 
-
 ### Other I2C library
 
 You can use other I2C library e.g. [SoftWire](https://github.com/stevemarple/SoftWire).
 
-``` C++
+```C++
 MPU9250_<SoftWire, MPU9250_WHOAMI_DEFAULT_VALUE> mpu;
 SoftWire sw(SDA, SCL);
 
@@ -201,8 +197,8 @@ MPU9255 mpu;
 
 ## APIs
 
-``` C++
-bool setup(const uint8_t addr, const MPU9250Setting& setting, WireType& w = Wire);
+```C++
+bool setup(const u_int8_t addr, const MPU9250Setting& setting, WireType& w = Wire);
 void verbose(const bool b);
 void ahrs(const bool b);
 void calibrateAccelGyro();
@@ -226,10 +222,10 @@ float getQuaternionY() const;
 float getQuaternionZ() const;
 float getQuaternionW() const;
 
-float getAcc(const uint8_t i) const;
-float getGyro(const uint8_t i) const;
-float getMag(const uint8_t i) const;
-float getLinearAcc(const uint8_t i) const;
+float getAcc(const u_int8_t i) const;
+float getGyro(const u_int8_t i) const;
+float getMag(const u_int8_t i) const;
+float getLinearAcc(const u_int8_t i) const;
 
 float getAccX() const;
 float getAccY() const;
@@ -244,10 +240,10 @@ float getLinearAccX() const;
 float getLinearAccY() const;
 float getLinearAccZ() const;
 
-float getAccBias(const uint8_t i) const;
-float getGyroBias(const uint8_t i) const;
-float getMagBias(const uint8_t i) const;
-float getMagScale(const uint8_t i) const;
+float getAccBias(const u_int8_t i) const;
+float getGyroBias(const u_int8_t i) const;
+float getMagBias(const u_int8_t i) const;
+float getMagScale(const u_int8_t i) const;
 
 float getAccBiasX() const;
 float getAccBiasY() const;

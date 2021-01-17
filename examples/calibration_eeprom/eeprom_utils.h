@@ -1,10 +1,11 @@
 #include <EEPROM.h>
 #include "MPU9250.h"
 
-const uint8_t EEPROM_SIZE = 1 + sizeof(float) * 3 * 4;
+const u_int8_t EEPROM_SIZE = 1 + sizeof(float) * 3 * 4;
 extern MPU9250 mpu;
 
-enum EEP_ADDR {
+enum EEP_ADDR
+{
     EEP_CALIB_FLAG = 0x00,
     EEP_ACC_BIAS = 0x01,
     EEP_GYRO_BIAS = 0x0D,
@@ -12,35 +13,42 @@ enum EEP_ADDR {
     EEP_MAG_SCALE = 0x25
 };
 
-void writeByte(int address, byte value) {
+void writeByte(int address, byte value)
+{
     EEPROM.put(address, value);
 }
 
-void writeFloat(int address, float value) {
+void writeFloat(int address, float value)
+{
     EEPROM.put(address, value);
 }
 
-byte readByte(int address) {
+byte readByte(int address)
+{
     byte valueIn = 0;
     EEPROM.get(address, valueIn);
     return valueIn;
 }
 
-float readFloat(int address) {
+float readFloat(int address)
+{
     float valueIn = 0;
     EEPROM.get(address, valueIn);
     return valueIn;
 }
 
-void clearCalibration() {
+void clearCalibration()
+{
     writeByte(EEP_CALIB_FLAG, 0);
 }
 
-bool isCalibrated() {
+bool isCalibrated()
+{
     return (readByte(EEP_CALIB_FLAG) == 0x01);
 }
 
-void saveCalibration() {
+void saveCalibration()
+{
     Serial.println("Write calibrated parameters to EEPROM");
     writeByte(EEP_CALIB_FLAG, 1);
     writeFloat(EEP_ACC_BIAS + 0, mpu.getAccBias(0));
@@ -60,9 +68,11 @@ void saveCalibration() {
 #endif
 }
 
-void loadCalibration() {
+void loadCalibration()
+{
     Serial.println("Load calibrated parameters from EEPROM");
-    if (isCalibrated()) {
+    if (isCalibrated())
+    {
         Serial.println("calibrated? : YES");
         Serial.println("load calibrated values");
         mpu.setAccBias(
@@ -81,7 +91,9 @@ void loadCalibration() {
             readFloat(EEP_MAG_SCALE + 0),
             readFloat(EEP_MAG_SCALE + 4),
             readFloat(EEP_MAG_SCALE + 8));
-    } else {
+    }
+    else
+    {
         Serial.println("calibrated? : NO");
         Serial.println("load default values");
         mpu.setAccBias(0., 0., 0.);
@@ -91,7 +103,8 @@ void loadCalibration() {
     }
 }
 
-void printCalibration() {
+void printCalibration()
+{
     Serial.println("< calibration parameters >");
     Serial.print("calibrated? : ");
     Serial.println(readByte(EEP_CALIB_FLAG) ? "YES" : "NO");
@@ -121,15 +134,18 @@ void printCalibration() {
     Serial.println(readFloat(EEP_MAG_SCALE + 8));
 }
 
-void printBytes() {
+void printBytes()
+{
     for (size_t i = 0; i < EEPROM_SIZE; ++i)
         Serial.println(readByte(i), HEX);
 }
 
-void setupEEPROM() {
+void setupEEPROM()
+{
     Serial.println("EEPROM start");
 
-    if (!isCalibrated()) {
+    if (!isCalibrated())
+    {
         Serial.println("Need Calibration!!");
     }
     Serial.println("EEPROM calibration value is : ");

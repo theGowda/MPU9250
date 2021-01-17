@@ -1,10 +1,18 @@
 #include "../MPU9250.h"
 
+typedef MPU9255 IMU;
+
+void print_roll_pitch_yaw(IMU *mpu)
+{
+    printf("Yaw, Pitch, Roll: %0.2f, %0.2f, %0.2f\n", mpu->getYaw(), mpu->getPitch(), mpu->getRoll());
+}
+
 int main()
 {
-    MPU9250 mpu;
+    IMU mpu;
+    I2CDevice dev;
 
-    if (!mpu.setup(0x68))
+    if (!mpu.setup(0x68, &dev))
     { // change to your own address
         while (1)
         {
@@ -17,14 +25,9 @@ int main()
     {
         if (mpu.update())
         {
-            print_roll_pitch_yaw();
+            print_roll_pitch_yaw(&mpu);
             for (int k = 0; k <= 1000; k++)
                 ;
         }
     }
-}
-
-void print_roll_pitch_yaw()
-{
-    printf("Yaw, Pitch, Roll: %0.2f, %0.2f, %0.2f\n", mpu.getYaw(), mpu.getPitch(), mpu.getRoll());
 }

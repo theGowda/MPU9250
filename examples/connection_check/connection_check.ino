@@ -1,15 +1,18 @@
 #include "MPU9250.h"
 
-uint8_t addrs[7] = {0};
-uint8_t device_count = 0;
+u_int8_t addrs[7] = {0};
+u_int8_t device_count = 0;
 
 template <typename WireType = TwoWire>
-void scan_mpu(WireType& wire = Wire) {
+void scan_mpu(WireType &wire = Wire)
+{
     Serial.println("Searching for i2c devices...");
     device_count = 0;
-    for (uint8_t i = 0x68; i < 0x70; ++i) {
+    for (u_int8_t i = 0x68; i < 0x70; ++i)
+    {
         wire.beginTransmission(i);
-        if (wire.endTransmission() == 0) {
+        if (wire.endTransmission() == 0)
+        {
             addrs[device_count++] = i;
             delay(1);
         }
@@ -19,7 +22,8 @@ void scan_mpu(WireType& wire = Wire) {
     Serial.println(" I2C devices");
 
     Serial.print("I2C addresses are: ");
-    for (uint8_t i = 0; i < device_count; ++i) {
+    for (u_int8_t i = 0; i < device_count; ++i)
+    {
         Serial.print("0x");
         Serial.print(addrs[i], HEX);
         Serial.print(" ");
@@ -28,17 +32,20 @@ void scan_mpu(WireType& wire = Wire) {
 }
 
 template <typename WireType = TwoWire>
-uint8_t readByte(uint8_t address, uint8_t subAddress, WireType& wire = Wire) {
-    uint8_t data = 0;
+u_int8_t readByte(u_int8_t address, u_int8_t subAddress, WireType &wire = Wire)
+{
+    u_int8_t data = 0;
     wire.beginTransmission(address);
     wire.write(subAddress);
     wire.endTransmission(false);
     wire.requestFrom(address, (size_t)1);
-    if (wire.available()) data = wire.read();
+    if (wire.available())
+        data = wire.read();
     return data;
 }
 
-void setup() {
+void setup()
+{
     Serial.begin(115200);
     Serial.flush();
     Wire.begin();
@@ -46,26 +53,34 @@ void setup() {
 
     scan_mpu();
 
-    if (device_count == 0) {
+    if (device_count == 0)
+    {
         Serial.println("No device found on I2C bus. Please check your hardware connection");
         while (1)
             ;
     }
 
     // check WHO_AM_I address of MPU
-    for (uint8_t i = 0; i < device_count; ++i) {
+    for (u_int8_t i = 0; i < device_count; ++i)
+    {
         Serial.print("I2C address 0x");
         Serial.print(addrs[i], HEX);
         byte c = readByte(addrs[i], WHO_AM_I_MPU9250);
-        if (c == MPU9250_WHOAMI_DEFAULT_VALUE) {
+        if (c == MPU9250_WHOAMI_DEFAULT_VALUE)
+        {
             Serial.println(" is MPU9250 and ready to use");
-        } else if (c == MPU9255_WHOAMI_DEFAULT_VALUE) {
+        }
+        else if (c == MPU9255_WHOAMI_DEFAULT_VALUE)
+        {
             Serial.println(" is MPU9255 and ready to use");
-        } else {
+        }
+        else
+        {
             Serial.println(" is not MPU series. Please use correct device");
         }
     }
 }
 
-void loop() {
+void loop()
+{
 }
