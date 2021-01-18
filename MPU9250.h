@@ -2,15 +2,11 @@
 #ifndef MPU9250_H
 #define MPU9250_H
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <unistd.h>
-#endif
 #include "i2c.h"
 #include <stdio.h>
 #include <string.h>
 #include "cmath"
+#include <time.h>
 #include "MPU9250/MPU9250RegisterMap.h"
 #include "MPU9250/QuaternionFilter.h"
 
@@ -90,7 +86,9 @@ struct MPU9250Setting
 
 void delay(unsigned long t)
 {
-    sleep(t);
+    clock_t ts1 = clock();
+    while (clock() - ts1 <= (t * (CLOCKS_PER_SEC / 1000)))
+        ;
 }
 
 template <u_int8_t WHO_AM_I>
@@ -134,18 +132,20 @@ class MPU9250_
     bool b_ahrs{true};
     bool b_verbose{false};
 
-    /*// I2C
-    WireType* wire;
-    */
     u_int8_t i2c_err_;
-    I2CDevice *device;
+    I2CDevice device;
 
 public:
     static constexpr u_int16_t CALIB_GYRO_SENSITIVITY = 131;    // = 131 LSB/degrees/sec
     static constexpr u_int16_t CALIB_ACCEL_SENSITIVITY = 16384; // = 16384 LSB/g
 
-    bool setup(const u_int8_t addr, I2CDevice *dev, const MPU9250Setting &mpu_setting = MPU9250Setting())
+    bool setup(const u_int8_t addr, const MPU9250Setting &mpu_setting = MPU9250Setting())
     {
+        int bus;
+        device.addr = 0x68;
+        device.iaddr_bytes = 1;
+        device.page_bytes = 1;
+
         // addr should be valid for MPU
         if ((addr < MPU9250_DEFAULT_ADDRESS) || (addr > MPU9250_DEFAULT_ADDRESS + 7))
         {
@@ -153,9 +153,14 @@ public:
             printf(" is not valid for MPU. Please check your I2C address.\n");
             return false;
         }
+        if ((bus = i2c_open("/dev/i2c-1")) == -1)
+        {
+            printf("Could not open i2c bus");
+            return 0;
+        }
+        device.bus = bus;
         MPU9250_ADDRESS = addr;
         setting = mpu_setting;
-        device = dev;
 
         if (isConnectedMPU9250())
         {
@@ -989,13 +994,13 @@ private:
 
     void write_byte(u_int8_t address, u_int8_t subAddress, u_int8_t data)
     {
-        device->addr = (unsigned short)address;
+        device.addr = (unsigned short)address;
 
         unsigned char buffer[1];
         ssize_t size = sizeof(buffer);
         memset(buffer, 0, sizeof(buffer));
 
-        if ((i2c_write(device, (unsigned int)subAddress, buffer, size)) != size)
+        if ((i2c_write(&device, (unsigned int)subAddress, buffer, size)) != size)
         {
             printf("There was an error writing to i2c device");
         }
@@ -1016,10 +1021,10 @@ private:
 
     u_int8_t read_byte(u_int8_t address, u_int8_t subAddress)
     {
-        device->addr = (unsigned short)address;
+        device.addr = (unsigned short)address;
 
         u_int8_t data = 0;
-        if ((i2c_read(device, (unsigned int)subAddress, &data, sizeof(data))) != sizeof(data))
+        if ((i2c_read(&device, (unsigned int)subAddress, &data, sizeof(data))) != sizeof(data))
         {
             printf("There was an error reading from i2c device");
             return 0;
@@ -1044,9 +1049,9 @@ private:
 
     void read_bytes(u_int8_t address, u_int8_t subAddress, u_int8_t count, u_int8_t *dest)
     {
-        device->addr = (unsigned short)address;
+        device.addr = (unsigned short)address;
 
-        if ((i2c_read(device, (unsigned int)subAddress, dest, count)) != count)
+        if ((i2c_read(&device, (unsigned int)subAddress, dest, count)) != count)
         {
             printf("There was an error reading from i2c device");
         }

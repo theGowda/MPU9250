@@ -1,5 +1,5 @@
 #include "../MPU9250.h"
-
+#include <time.h>
 typedef MPU9255 IMU;
 
 void print_roll_pitch_yaw(IMU *mpu)
@@ -10,47 +10,26 @@ void print_roll_pitch_yaw(IMU *mpu)
 int main()
 {
     IMU mpu;
-    struct timeval ts;
-    long newTime = 0;
-    long oldTime = 0;
-
-    I2CDevice dev;
-    dev.bus = 1;
-    dev.addr = 0x68;
-    dev.iaddr_bytes = 1;
-    dev.page_bytes = 1;
-
-    memset(&dev, 0, sizeof(dev));
-    int bus;
-
-    /* Open i2c bus /dev/i2c-0 */
-    if ((bus = i2c_open("/dev/i2c-1")) == -1) {
-        printf("Could not open i2c bus");
-    }
-    else
+    clock_t ts1;
+    ts1 = clock();
+    if (!mpu.setup(0x68))
     {
-        if (!mpu.setup(0x68, &dev))
-        {
-            while (1)
-            {
-                printf("MPU connection failed. Please check your connection with `connection_check` example.\n");
-                delay(5000);
-            }
-        }
-
         while (1)
         {
-            if (mpu.update())
+            printf("MPU connection failed. Please check your connection with `connection_check` example.\n");
+            delay(5000);
+        }
+    }
+
+    while (1)
+    {
+        if (mpu.update())
+        {
+            if (clock() - ts1 >= (25 * (CLOCKS_PER_SEC / 1000)))
             {
-                gettimeofday(&ts, NULL);
-                newTime = ts.tv_usec * 1000;
-                if((newTime - oldTime)>25){
-                    print_roll_pitch_yaw(&mpu);
-                    gettimeofday(&ts, NULL);
-                    oldTime = ts.tv_usec * 1000;
-                }
+                print_roll_pitch_yaw(&mpu);
+                ts1 = clock();
             }
         }
     }
-    i2c_close(bus);
 }

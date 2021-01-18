@@ -3,12 +3,7 @@
 #define QUATERNIONFILTER_H
 
 #include "cmath"
-
-#ifdef _WIN32
-#include <sys\time.h>
-#else
-#include <sys/time.h>
-#endif
+#include <time.h>
 
 #define DEG_TO_RAD 0.017453292519943295769236907684886
 
@@ -33,9 +28,9 @@ class QuaternionFilter
 
     QuatFilterSel filter_sel{QuatFilterSel::MADGWICK};
     double deltaT{0.};
-    u_int32_t newTime{0}, oldTime{0};
+    //u_int32_t newTime{0}, oldTime{0};
 
-    struct timeval ts;
+    clock_t ts1 = clock();
 
 public:
     void select_filter(QuatFilterSel sel)
@@ -45,10 +40,8 @@ public:
 
     void update(float ax, float ay, float az, float gx, float gy, float gz, float mx, float my, float mz, float *q)
     {
-        gettimeofday(&ts, NULL);
-        newTime = ts.tv_usec;
-        deltaT = newTime - oldTime;
-        oldTime = newTime;
+        deltaT = (clock() - ts1) / (CLOCKS_PER_SEC / (1000 * 1000));
+        ts1 = clock();
         deltaT = fabs(deltaT * 0.001 * 0.001);
 
         switch (filter_sel)
