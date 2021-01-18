@@ -3,7 +3,12 @@
 #define QUATERNIONFILTER_H
 
 #include "cmath"
+
+#ifdef _WIN32
 #include <sys\time.h>
+#else
+#include <sys/time.h>
+#endif
 
 #define DEG_TO_RAD 0.017453292519943295769236907684886
 

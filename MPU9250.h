@@ -2,6 +2,11 @@
 #ifndef MPU9250_H
 #define MPU9250_H
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <unistd.h>
+#endif
 #include "i2c.h"
 #include <stdio.h>
 #include <string.h>
@@ -85,8 +90,7 @@ struct MPU9250Setting
 
 void delay(unsigned long t)
 {
-    for (int k = 0; k <= t * 10; k++)
-        ;
+    sleep(t);
 }
 
 template <u_int8_t WHO_AM_I>
